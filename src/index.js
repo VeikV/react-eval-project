@@ -1,22 +1,34 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import ApplicationNode from './ApplicationNode'
-import {unregister} from './services/registerServiceWorker'
-import store from './services/store'
+import {BrowserRouter} from 'react-router-dom'
+import {Provider} from 'react-redux'
+import {compose, createStore, applyMiddleware} from 'redux'
+import rootReducer from 'store/reducers'
+import createSagaMiddleware from 'redux-saga'
+import rootSaga from 'store/sagas'
 
-const render = (Component) => {
-  ReactDOM.render(
-    <Component store={store} />,
-    document.getElementById('root')
-  )
+import App from './app'
+
+let composeEnhancers
+
+if (process.env.APP_ENV !== 'production') {
+  composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 }
 
-render(ApplicationNode)
-unregister()
+const sagaMiddleware = createSagaMiddleware()
 
-if (process.env.NODE_ENV === 'development' && module.hot) {
-  module.hot.accept('./ApplicationNode', () => {
-    const NextApp = require('./ApplicationNode').default
-    render(NextApp)
-  })
-}
+const store = createStore(rootReducer, composeEnhancers(
+  applyMiddleware(sagaMiddleware)
+))
+
+sagaMiddleware.run(rootSaga)
+
+const app = (
+  <Provider store={store}>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </Provider>
+)
+
+ReactDOM.render(app, document.getElementById('root'))

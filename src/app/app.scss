@@ -1,0 +1,9 @@
+@import '../common/scss/variables';
+@import '../common/scss/normalize';
+
+.container {
+  padding-left: 32px;
+  padding-right: 32px;
+  background-color: $backgroundColorPrimary;
+  color: $colorPrimary;
+}
